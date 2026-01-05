@@ -1,0 +1,16 @@
+meta {
+  name: Delete Message
+  type: http
+  seq: 8
+}
+
+delete {
+  url: http://localhost:9001/messages/message/29F484AA-638E-4A9F-97CF-ACF2F33ACEF7
+  body: json
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

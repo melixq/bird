@@ -1,0 +1,16 @@
+meta {
+  name: Get All Roles
+  type: http
+  seq: 3
+}
+
+get {
+  url: http://localhost:9000/roles
+  body: json
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

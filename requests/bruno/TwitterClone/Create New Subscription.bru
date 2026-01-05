@@ -1,0 +1,26 @@
+meta {
+  name: Create New Subscription
+  type: http
+  seq: 5
+}
+
+post {
+  url: http://localhost:9001/subscriptions
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "subscriber": "70A64B54-43C3-4C18-BBEC-64590FF7E0CC",
+      "producers": [
+          "1CD89E11-602A-4186-AFBF-E0149B59EB08",
+          "6E27EA06-A716-4C89-AF88-813749A8BD48"
+      ]
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
