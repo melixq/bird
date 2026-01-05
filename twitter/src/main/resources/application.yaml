@@ -15,4 +15,7 @@ ums:
   port: 9000
   paths:
     user: /users/user
+    validate-token: /auth/validate
 
+jwt:
+  secret: ${JWT_SECRET}
