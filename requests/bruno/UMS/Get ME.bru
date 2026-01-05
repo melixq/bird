@@ -1,0 +1,20 @@
+meta {
+  name: Get ME
+  type: http
+  seq: 8
+}
+
+get {
+  url: http://localhost:9000/auth/me
+  body: none
+  auth: inherit
+}
+
+headers {
+  Bearer: 123
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
