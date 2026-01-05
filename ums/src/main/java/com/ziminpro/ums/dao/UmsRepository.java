@@ -17,4 +17,8 @@ public interface UmsRepository {
     UUID createUser(User user);
 
 	int deleteUser(UUID userId);
+
+    User findUserByGithubId(String githubId);
+    User findUserByEmail(String email);
+    UUID createOrUpdateGithubUser(User user);
 }

@@ -13,36 +13,79 @@ import com.ziminpro.ums.dtos.Roles;
 import com.ziminpro.ums.dtos.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class JdbcUmsRepository implements UmsRepository {
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
+
+    public JdbcUmsRepository(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    private final RowMapper<User> userWithRolesRowMapper = (rs, rowNum) -> {
+        UUID userId = DaoHelper.bytesArrayToUuid(rs.getBytes("users.id"));
+        String name = rs.getString("users.name");
+        String email = rs.getString("users.email");
+        String password = rs.getString("users.password");
+        String githubId = rs.getString("users.github_id");
+        Integer created = rs.getInt("users.created");
+
+        LastSession lastSession = null;
+        Integer lastVisitIn = (Integer) rs.getObject("last_visit.in");
+        Integer lastVisitOut = (Integer) rs.getObject("last_visit.out");
+        if (lastVisitIn != null && lastVisitOut != null) {
+            lastSession = new LastSession(lastVisitIn, lastVisitOut);
+        }
+
+        Roles role = null;
+        byte[] roleIdBytes = rs.getBytes("roles.id");
+        if (roleIdBytes != null) {
+            role = new Roles(
+                    DaoHelper.bytesArrayToUuid(roleIdBytes),
+                    rs.getString("roles.name"),
+                    rs.getString("roles.description")
+            );
+        }
+
+        User user = new User();
+        user.setId(userId);
+        user.setName(name);
+        user.setEmail(email);
+        user.setPassword(password);
+        user.setGithubId(githubId);
+        user.setCreated(created);
+        user.setLastSession(lastSession);
+
+        if (role != null) {
+            user.setRoles(Arrays.asList(role));
+        }
+
+        return user;
+    };
 
     @Override
     public Map<UUID, User> findAllUsers() {
         Map<UUID, User> users = new HashMap<>();
 
-        List<Object> oUsers = jdbcTemplate.query(Constants.GET_ALL_USERS,
-                (rs, rowNum) -> new User(DaoHelper.bytesArrayToUuid(rs.getBytes("users.id")), rs.getString("users.name"),
-                        rs.getString("users.email"), rs.getString("users.password"), rs.getInt("users.created"),
-                        Arrays.asList(new Roles(DaoHelper.bytesArrayToUuid(rs.getBytes("roles.id")),
-                                rs.getString("roles.name"), rs.getString("roles.description"))),
-                        new LastSession(rs.getInt("last_visit.in"), rs.getInt("last_visit.out"))));
+        List<User> userList = jdbcTemplate.query(Constants.GET_ALL_USERS, userWithRolesRowMapper);
 
-        for (Object oUser : oUsers) {
-            if (!users.containsKey(((User) oUser).getId())) {
-                User user = new User();
-                user.setId(((User) oUser).getId());
-                user.setName(((User) oUser).getName());
-                user.setEmail(((User) oUser).getEmail());
-                user.setPassword(((User) oUser).getPassword());
-                user.setCreated(((User) oUser).getCreated());
-                user.setLastSession(((User) oUser).getLastSession());
-                users.put(((User) oUser).getId(), user);
+        for (User user : userList) {
+            if (!users.containsKey(user.getId())) {
+                User newUser = new User();
+                newUser.setId(user.getId());
+                newUser.setName(user.getName());
+                newUser.setEmail(user.getEmail());
+                newUser.setPassword(user.getPassword());
+                newUser.setGithubId(user.getGithubId());
+                newUser.setCreated(user.getCreated());
+                newUser.setLastSession(user.getLastSession());
+                users.put(user.getId(), newUser);
             }
-            users.get(((User) oUser).getId()).addRole(((User) oUser).getRoles().get(0));
+            if (user.getRoles() != null && !user.getRoles().isEmpty()) {
+                users.get(user.getId()).addRole(user.getRoles().getFirst());
+            }
         }
         return users;
     }
@@ -50,23 +93,77 @@ public class JdbcUmsRepository implements UmsRepository {
     @Override
     public User findUserByID(UUID userId) {
         User user = new User();
-        List<Object> users = jdbcTemplate.query(Constants.GET_USER_BY_ID_FULL,
-                (rs, rowNum) -> new User(DaoHelper.bytesArrayToUuid(rs.getBytes("users.id")), rs.getString("users.name"),
-                        rs.getString("users.email"), rs.getString("users.password"), rs.getInt("users.created"),
-                        Arrays.asList(new Roles(DaoHelper.bytesArrayToUuid(rs.getBytes("roles.id")),
-                                rs.getString("roles.name"), rs.getString("roles.description"))),
-                        new LastSession(rs.getInt("last_visit.in"), rs.getInt("last_visit.out"))),
-                userId.toString());
-        for (Object oUser : users) {
+        List<User> users = jdbcTemplate.query(
+                Constants.GET_USER_BY_ID_FULL,
+                userWithRolesRowMapper,
+                userId.toString()
+        );
+
+        for (User u : users) {
             if (user.getId() == null) {
-                user.setId(((User) oUser).getId());
-                user.setName(((User) oUser).getName());
-                user.setEmail(((User) oUser).getEmail());
-                user.setPassword(((User) oUser).getPassword());
-                user.setCreated(((User) oUser).getCreated());
-                user.setLastSession(((User) oUser).getLastSession());
+                user.setId(u.getId());
+                user.setName(u.getName());
+                user.setEmail(u.getEmail());
+                user.setPassword(u.getPassword());
+                user.setGithubId(u.getGithubId());
+                user.setCreated(u.getCreated());
+                user.setLastSession(u.getLastSession());
             }
-            user.addRole(((User) oUser).getRoles().get(0));
+            if (u.getRoles() != null && !u.getRoles().isEmpty()) {
+                user.addRole(u.getRoles().getFirst());
+            }
+        }
+        return user;
+    }
+
+    @Override
+    public User findUserByGithubId(String githubId) {
+        User user = new User();
+        List<User> users = jdbcTemplate.query(
+                Constants.GET_USER_BY_GITHUB_ID,
+                userWithRolesRowMapper,
+                githubId
+        );
+
+        for (User u : users) {
+            if (user.getId() == null) {
+                user.setId(u.getId());
+                user.setName(u.getName());
+                user.setEmail(u.getEmail());
+                user.setPassword(u.getPassword());
+                user.setGithubId(u.getGithubId());
+                user.setCreated(u.getCreated());
+                user.setLastSession(u.getLastSession());
+            }
+            if (u.getRoles() != null && !u.getRoles().isEmpty()) {
+                user.addRole(u.getRoles().getFirst());
+            }
+        }
+        return user;
+    }
+
+    @Override
+    public User findUserByEmail(String email) {
+        User user = new User();
+        List<User> users = jdbcTemplate.query(
+                Constants.GET_USER_BY_EMAIL,
+                userWithRolesRowMapper,
+                email
+        );
+
+        for (User u : users) {
+            if (user.getId() == null) {
+                user.setId(u.getId());
+                user.setName(u.getName());
+                user.setEmail(u.getEmail());
+                user.setPassword(u.getPassword());
+                user.setGithubId(u.getGithubId());
+                user.setCreated(u.getCreated());
+                user.setLastSession(u.getLastSession());
+            }
+            if (u.getRoles() != null && !u.getRoles().isEmpty()) {
+                user.addRole(u.getRoles().getFirst());
+            }
         }
         return user;
     }
@@ -80,15 +177,70 @@ public class JdbcUmsRepository implements UmsRepository {
         try {
             jdbcTemplate.update(Constants.CREATE_USER, userId.toString(), user.getName(), user.getEmail(),
                     user.getPassword(), timestamp, null);
-            for (Roles role : user.getRoles()) {
-                jdbcTemplate.update(Constants.ASSIGN_ROLE, userId.toString(),
-                        roles.get(role.getRole()).getRoleId().toString());
+
+            if (user.getRoles() != null) {
+                for (Roles role : user.getRoles()) {
+                    Roles existingRole = roles.get(role.getRole());
+                    if (existingRole != null) {
+                        jdbcTemplate.update(Constants.ASSIGN_ROLE, userId.toString(),
+                                existingRole.getRoleId().toString());
+                    }
+                }
             }
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
 
         return userId;
+    }
+
+    @Override
+    public UUID createOrUpdateGithubUser(User user) {
+        User existingUser = findUserByGithubId(user.getGithubId());
+
+        if (existingUser.getId() != null) {
+            try {
+                jdbcTemplate.update(
+                        Constants.UPDATE_USER_BY_GITHUB_ID,
+                        user.getName(),
+                        user.getEmail(),
+                        user.getGithubId()
+                );
+                return existingUser.getId();
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        } else {
+            UUID userId = UUID.randomUUID();
+            long timestamp = Instant.now().getEpochSecond();
+
+            try {
+                jdbcTemplate.update(
+                        Constants.CREATE_USER_WITH_GITHUB,
+                        userId.toString(),
+                        user.getName(),
+                        user.getEmail(),
+                        user.getGithubId(),
+                        timestamp
+                );
+
+                Roles subscriberRole = findRoleByName("SUBSCRIBER");
+                if (subscriberRole != null) {
+                    jdbcTemplate.update(
+                            Constants.ASSIGN_ROLE,
+                            userId.toString(),
+                            subscriberRole.getRoleId().toString()
+                    );
+                }
+
+                return userId;
+            } catch (Exception e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
     }
 
     @Override
@@ -100,10 +252,34 @@ public class JdbcUmsRepository implements UmsRepository {
     public Map<String, Roles> findAllRoles() {
         Map<String, Roles> roles = new HashMap<>();
         jdbcTemplate.query(Constants.GET_ALL_ROLES, rs -> {
-            Roles role = new Roles(DaoHelper.bytesArrayToUuid(rs.getBytes("roles.id")), rs.getString("roles.name"),
-                    rs.getString("roles.description"));
+            Roles role = new Roles(
+                    DaoHelper.bytesArrayToUuid(rs.getBytes("roles.id")),
+                    rs.getString("roles.name"),
+                    rs.getString("roles.description")
+            );
             roles.put(rs.getString("roles.name"), role);
         });
         return roles;
+    }
+
+    /**
+     * Helper method to find a role by name
+     */
+    private Roles findRoleByName(String roleName) {
+        try {
+            List<Roles> roles = jdbcTemplate.query(
+                    Constants.GET_ROLE_BY_NAME,
+                    (rs, rowNum) -> new Roles(
+                            DaoHelper.bytesArrayToUuid(rs.getBytes("id")),
+                            rs.getString("name"),
+                            rs.getString("description")
+                    ),
+                    roleName
+            );
+            return roles.isEmpty() ? null : roles.getFirst();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 }
