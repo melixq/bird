@@ -58,6 +58,30 @@ CREATE TABLE `users_has_roles` (
   CONSTRAINT `fk_users_has_roles_users` FOREIGN KEY (`users_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
+DROP TABLE IF EXISTS `sessions`;
+CREATE TABLE `sessions` (
+    `id` binary(16) NOT NULL,
+    `user_id` binary(16) NOT NULL,
+    `access_token` varchar(512) NOT NULL,
+    `refresh_token` varchar(512) NOT NULL,
+    `access_token_expires_at` bigint NOT NULL,
+    `refresh_token_expires_at` bigint NOT NULL,
+    `github_id` varchar(100) DEFAULT NULL,
+    `github_username` varchar(100) DEFAULT NULL,
+    `created_at` bigint NOT NULL,
+    `last_accessed_at` bigint NOT NULL,
+    `is_active` tinyint(1) DEFAULT 1,
+    PRIMARY KEY (`id`),
+    KEY `idx_user_id` (`user_id`),
+    KEY `idx_access_token` (`access_token`(255)),
+    KEY `idx_refresh_token` (`refresh_token`(255)),
+    CONSTRAINT `fk_sessions_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+ALTER TABLE `users` ADD COLUMN `github_id` varchar(100) DEFAULT NULL AFTER `email`;
+ALTER TABLE `users` ADD UNIQUE KEY `idx_github_id` (`github_id`);
+ALTER TABLE `users` MODIFY `password` varchar(255) DEFAULT NULL;
+
 INSERT INTO `last_visit` (`id`, `in`, `out`) VALUES
 (X'306DCF05D3D64B438E066B6FFE2331FC', '1604249194', '1604249224'),
 (X'3C37571B0F494FED875845BFAE428B29', '1604249181', '1604249209'),
