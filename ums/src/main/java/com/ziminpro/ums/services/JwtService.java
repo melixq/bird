@@ -1,4 +1,4 @@
-﻿package com.ziminpro.ums.services;
+package com.ziminpro.ums.services;
 
 import com.ziminpro.ums.dtos.JwtClaims;
 import com.ziminpro.ums.dtos.Roles;
@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -74,11 +75,13 @@ public class JwtService {
                     .parseSignedClaims(token)
                     .getPayload();
 
+            List<String> roles = extractRoles(claims.get("roles"));
+
             return JwtClaims.builder()
                     .userId(UUID.fromString(claims.getSubject()))
                     .email(claims.get("email", String.class))
                     .name(claims.get("name", String.class))
-                    .roles(claims.get("roles", List.class))
+                    .roles(roles)
                     .issuedAt(claims.getIssuedAt().getTime())
                     .expiresAt(claims.getExpiration().getTime())
                     .build();
@@ -116,5 +119,14 @@ public class JwtService {
                 .parseSignedClaims(token)
                 .getPayload();
         return claims.get("type", String.class);
+    }
+
+    private List<String> extractRoles(Object rolesObj) {
+        if (rolesObj instanceof List<?> rawList) {
+            return rawList.stream()
+                    .map(Object::toString)
+                    .collect(Collectors.toList());
+        }
+        return new ArrayList<>();
     }
 }
