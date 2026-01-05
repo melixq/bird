@@ -1,13 +1,11 @@
 package com.ziminpro.twitter.controllers;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 import com.ziminpro.twitter.dtos.Constants;
 import com.ziminpro.twitter.dtos.Subscription;
 import com.ziminpro.twitter.services.SubscriptionsService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -19,15 +17,15 @@ import reactor.core.publisher.Mono;
 
 @RestController
 public class SubscriptionController {
+    private final SubscriptionsService subscriptionsService;
 
-    @Autowired
-    private SubscriptionsService subscriptionsService;
-
-    Map<String, Object> response = new HashMap<>();
+    public SubscriptionController(SubscriptionsService subscriptionsService) {
+        this.subscriptionsService = subscriptionsService;
+    }
 
     @RequestMapping(method = RequestMethod.GET, path = Constants.URI_SUBSCRIPTION + "/{subscriber-id}")
     public Mono<ResponseEntity<Map<String, Object>>> getSubscriptionBySubscriberId(
-            @PathVariable(value = "subscriber-id", required = true) UUID subscriberId) {
+            @PathVariable(value = "subscriber-id") UUID subscriberId) {
         return subscriptionsService.getSubscriptionsForSubscriberById(subscriberId);
     }
 
