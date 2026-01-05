@@ -1,0 +1,23 @@
+meta {
+  name: Create New Message
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:9001/messages/message
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "author": "6e27ea06-a716-4c89-af88-813749a8bd48",
+      "content": "MAGA"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

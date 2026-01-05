@@ -1,0 +1,16 @@
+meta {
+  name: Get Subscription for Subscriber
+  type: http
+  seq: 3
+}
+
+get {
+  url: http://localhost:9001/subscriptions/subscriber/70A64B54-43C3-4C18-BBEC-64590FF7E0CC
+  body: json
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

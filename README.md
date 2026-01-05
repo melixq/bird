@@ -25,11 +25,7 @@ To build the project, follow the steps below.
 
 3. Set up the database by running the provided SQL script.
     ```shell
-    docker run -e MYSQL_ROOT_PASSWORD=passw \
-    -d --name bird \
-    -v bird-db-data:/var/folders/mysql/data \
-    -v ./database:/database -p 3306:3306 \
-    mysql:latest
+    docker run -e MYSQL_ROOT_PASSWORD=passw -d --name bird -v bird-db-data:/var/folders/mysql/data -v ./database:/database -p 3306:3306 mysql:latest
     ```
 
 4. Create databases for MySQL and then tables. After that import data there.

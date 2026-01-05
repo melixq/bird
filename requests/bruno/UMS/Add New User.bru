@@ -1,0 +1,34 @@
+meta {
+  name: Add New User
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:9000/users/user
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+      "name": "Eugene Zimin",
+      "email": "eugene@zimin.world",
+      "password": "password",
+      "roles": [
+          {
+              "role": "SUBSCRIBER",
+              "description": "Message content consumer"
+          },
+          {
+              "role": "PRODUCER",
+              "description": "Message content producer"
+          }
+      ]
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

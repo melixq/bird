@@ -1,0 +1,16 @@
+meta {
+  name: Get All Messages for Producer
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://localhost:9001/messages/producer/6e27ea06-a716-4c89-af88-813749a8bd48
+  body: json
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
