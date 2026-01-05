@@ -1,4 +1,4 @@
-﻿package com.ziminpro.ums.dtos;
+package com.ziminpro.ums.dtos;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

@@ -1,4 +1,4 @@
-﻿package com.ziminpro.ums.dtos;
+package com.ziminpro.ums.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

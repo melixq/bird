@@ -1,4 +1,4 @@
-﻿package com.ziminpro.ums.dao;
+package com.ziminpro.ums.dao;
 
 import com.ziminpro.ums.dtos.Session;
 import org.springframework.jdbc.core.JdbcTemplate;
