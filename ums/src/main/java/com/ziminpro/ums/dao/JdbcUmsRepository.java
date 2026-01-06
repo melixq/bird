@@ -12,6 +12,7 @@ import com.ziminpro.ums.dtos.LastSession;
 import com.ziminpro.ums.dtos.Roles;
 import com.ziminpro.ums.dtos.User;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -223,7 +224,8 @@ public class JdbcUmsRepository implements UmsRepository {
                         user.getName(),
                         user.getEmail(),
                         user.getGithubId(),
-                        timestamp
+                        timestamp,
+                        0
                 );
 
                 Roles subscriberRole = findRoleByName("SUBSCRIBER");
@@ -235,11 +237,40 @@ public class JdbcUmsRepository implements UmsRepository {
                     );
                 }
 
+                Roles producerRole = findRoleByName("PRODUCER");
+                if (producerRole != null) {
+                    jdbcTemplate.update(
+                            Constants.ASSIGN_ROLE,
+                            userId.toString(),
+                            producerRole.getRoleId().toString()
+                    );
+                }
+
                 return userId;
             } catch (Exception e) {
                 e.printStackTrace();
                 return null;
             }
+        }
+    }
+
+    @Override
+    public boolean incrementUserTokenVersion(UUID userId) {
+        var sql = "UPDATE users SET token_version = COALESCE(token_version, 0) + 1, WHERE id = ?";
+        int result = jdbcTemplate.update(sql,
+                (Object) DaoHelper.uuidToBytesArray(userId)
+        );
+        return result == 1;
+    }
+
+    @Override
+    public Integer getUserTokenVersion(UUID userId) {
+        var sql = "SELECT token_version FROM users WHERE id = ?";
+        try {
+            return jdbcTemplate.queryForObject(sql, Integer.class,
+                    (Object) DaoHelper.uuidToBytesArray(userId));
+        } catch (EmptyResultDataAccessException e) {
+            return null;
         }
     }
 
@@ -262,9 +293,6 @@ public class JdbcUmsRepository implements UmsRepository {
         return roles;
     }
 
-    /**
-     * Helper method to find a role by name
-     */
     private Roles findRoleByName(String roleName) {
         try {
             List<Roles> roles = jdbcTemplate.query(
