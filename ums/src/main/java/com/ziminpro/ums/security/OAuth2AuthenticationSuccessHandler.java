@@ -43,7 +43,15 @@ public class OAuth2AuthenticationSuccessHandler implements ServerAuthenticationS
                 githubUser.setId(Objects.requireNonNull(oauth2User.getAttribute("id")).toString());
                 githubUser.setLogin(oauth2User.getAttribute("login"));
                 githubUser.setName(oauth2User.getAttribute("name"));
-                githubUser.setEmail(oauth2User.getAttribute("email"));
+
+                // User can make their email private on GitHub, so it will be null
+                String email = oauth2User.getAttribute("email");
+                if (email == null || email.trim().isEmpty()) {
+                    // Generate a default email using the GitHub login
+                    // Format: github_username@github.local
+                    email = oauth2User.getAttribute("login") + "@github.local";
+                }
+                githubUser.setEmail(email);
 
                 // Authenticate and create session
                 AuthResponse authResponse = authenticationService.authenticateGithubUser(githubUser);
@@ -57,15 +65,12 @@ public class OAuth2AuthenticationSuccessHandler implements ServerAuthenticationS
                         .build()
                         .toUriString();
 
-                return webFilterExchange.getExchange().getResponse()
-                        .writeWith(Mono.empty())
-                        .then(Mono.fromRunnable(() -> {
-                            webFilterExchange.getExchange().getResponse().setStatusCode(
-                                    HttpStatus.FOUND
-                            );
-                            webFilterExchange.getExchange().getResponse().getHeaders()
-                                    .setLocation(URI.create(redirectUrl));
-                        }));
+                var response = webFilterExchange.getExchange().getResponse();
+                response.setStatusCode(HttpStatus.FOUND);
+                response.getHeaders().setLocation(URI.create(redirectUrl));
+
+                return response.setComplete();
+
             } catch (Exception e) {
                 String errorRedirect = UriComponentsBuilder
                         .fromUriString(frontendUrl + "/auth/failure")
@@ -73,15 +78,11 @@ public class OAuth2AuthenticationSuccessHandler implements ServerAuthenticationS
                         .build()
                         .toUriString();
 
-                return webFilterExchange.getExchange().getResponse()
-                        .writeWith(Mono.empty())
-                        .then(Mono.fromRunnable(() -> {
-                            webFilterExchange.getExchange().getResponse().setStatusCode(
-                                    HttpStatus.FOUND
-                            );
-                            webFilterExchange.getExchange().getResponse().getHeaders()
-                                    .setLocation(URI.create(errorRedirect));
-                        }));
+                var response = webFilterExchange.getExchange().getResponse();
+                response.setStatusCode(HttpStatus.FOUND);
+                response.getHeaders().setLocation(URI.create(errorRedirect));
+
+                return response.setComplete();
             }
         });
     }

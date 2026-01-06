@@ -21,4 +21,6 @@ public interface UmsRepository {
     User findUserByGithubId(String githubId);
     User findUserByEmail(String email);
     UUID createOrUpdateGithubUser(User user);
+    boolean incrementUserTokenVersion(UUID userId);
+    Integer getUserTokenVersion(UUID userId);
 }

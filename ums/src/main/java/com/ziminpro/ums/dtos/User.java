@@ -21,6 +21,7 @@ public class User {
     private String githubId;
     private Integer created;
     private List<Roles> roles;
+    private Integer tokenVersion;
     private LastSession lastSession;
 
     public User(UUID id, String name, String email, String password, Integer created,
