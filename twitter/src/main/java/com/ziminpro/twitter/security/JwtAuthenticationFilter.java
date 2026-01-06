@@ -13,6 +13,7 @@ import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -27,7 +28,6 @@ public class JwtAuthenticationFilter implements WebFilter {
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         String path = exchange.getRequest().getPath().value();
 
-        // Skip auth for public endpoints
         if (path.startsWith("/actuator") || path.equals("/health")) {
             return chain.filter(exchange);
         }
@@ -50,18 +50,25 @@ public class JwtAuthenticationFilter implements WebFilter {
                                         null,
                                         authorities
                                 );
-                        authentication.setDetails(claims);
+
+                        Map<String, Object> details = Map.of(
+                                "token", token,
+                                "email", claims.get("email"),
+                                "name", claims.get("name"),
+                                "roles", claims.get("roles")
+                        );
+                        authentication.setDetails(details);
 
                         return chain.filter(exchange)
                                 .contextWrite(ReactiveSecurityContextHolder.withAuthentication(authentication));
                     })
                     .onErrorResume(e -> {
+                        System.err.println("JWT Validation Error: " + e.getMessage());
                         exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
                         return exchange.getResponse().setComplete();
                     });
         }
 
-        // No token provided - return unauthorized
         exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
         return exchange.getResponse().setComplete();
     }
