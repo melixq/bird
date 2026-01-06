@@ -6,8 +6,14 @@ meta {
 
 post {
   url: http://localhost:9000/auth/refresh
-  body: none
+  body: json
   auth: inherit
+}
+
+body:json {
+  {
+    "refreshToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyNWVkZjM2MC1mYmRlLTQ4ODktYWQ1ZC1lMjc2NDk2NTBiNGQiLCJ0eXBlIjoicmVmcmVzaCIsImp0aSI6IjRhMTRkNGM2LWE3YzgtNDBkZi04ZDg2LTk4NWVkZDA4NGRlZSIsImlhdCI6MTc2NzcwMzQ3NiwiZXhwIjoxNzY4MzA4Mjc2fQ._po0pDv0ZcoMRy8Cti5d6Sx-JsPZ8C5v0lGFXlpS7MQdqSpTxizQAhZ4vOzeKp9LVzNFpd-zrt_FjW_eCofFdA"
+  }
 }
 
 settings {
