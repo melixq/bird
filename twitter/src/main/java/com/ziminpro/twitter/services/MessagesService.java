@@ -22,17 +22,19 @@ import reactor.core.publisher.Mono;
 
 @Service
 public class MessagesService {
-    
-    @Autowired
-    private MessageRepository messageRepository;
+    private final MessageRepository messageRepository;
 
-    @Autowired
-    private UMSConnector umsConnector;
+    private final UMSConnector umsConnector;
 
     @Value("${ums.paths.user}")
     private String uriUser;
 
     Map<String, Object> response = new HashMap<>();
+
+    public MessagesService(MessageRepository messageRepository, UMSConnector umsConnector) {
+        this.messageRepository = messageRepository;
+        this.umsConnector = umsConnector;
+    }
 
     public Mono<ResponseEntity<Map<String, Object>>> createMessage(Message message) {
         return umsConnector.retrieveUmsData(uriUser + "/" + message.getAuthor().toString())
@@ -75,7 +77,7 @@ public class MessagesService {
 
     public Mono<ResponseEntity<Map<String, Object>>> getMessagesForProducerById(UUID producerId) {
         List<Message> messages = messageRepository.getMessagesForProducerById(producerId);
-        if (messages.size() == 0) {
+        if (messages.isEmpty()) {
             response.put(Constants.CODE, "404");
             response.put(Constants.MESSAGE, "Either producer didn't produce any messages or producer not found");
             response.put(Constants.DATA, new ArrayList<>());
@@ -97,7 +99,7 @@ public class MessagesService {
             if (user.hasRole(Roles.SUBSCRIBER)) {
                 messages = messageRepository.getMessagesForSubscriberById(subscriberId);
             }
-            if (messages.size() == 0) {
+            if (messages.isEmpty()) {
                 response.put(Constants.CODE, "404");
                 response.put(Constants.MESSAGE, "Subscription not found or empty");
                 response.put(Constants.DATA, new ArrayList<>());

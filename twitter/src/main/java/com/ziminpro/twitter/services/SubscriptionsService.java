@@ -20,17 +20,19 @@ import reactor.core.publisher.Mono;
 
 @Service
 public class SubscriptionsService {
+    private final SubscriptionRepository subscriptionRepository;
 
-    @Autowired
-    private SubscriptionRepository subscriptionRepository;
-
-    @Autowired
-    private UMSConnector umsConnector;
+    private final UMSConnector umsConnector;
 
     @Value("${ums.paths.user}")
     private String uriUser;
 
     Map<String, Object> response = new HashMap<>();
+
+    public SubscriptionsService(SubscriptionRepository subscriptionRepository, UMSConnector umsConnector) {
+        this.subscriptionRepository = subscriptionRepository;
+        this.umsConnector = umsConnector;
+    }
 
     public Mono<ResponseEntity<Map<String, Object>>> getSubscriptionsForSubscriberById(UUID subscriberId) {
         return umsConnector.retrieveUmsData(uriUser + "/" + subscriberId.toString()).flatMap(res -> {
