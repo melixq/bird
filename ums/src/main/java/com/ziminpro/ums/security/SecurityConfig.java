@@ -3,8 +3,10 @@ package com.ziminpro.ums.security;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
@@ -30,11 +32,7 @@ public class SecurityConfig {
                         .pathMatchers(
                                 "/oauth2/**",
                                 "/login/oauth2/**",
-                                "/auth/login",
-                                "/auth/refresh",
-                                "/auth/validate",
-                                "/auth/me",
-                                "/auth/logout",
+                                "/auth/**",
                                 "/roles"
                         ).permitAll()
                         .anyExchange().authenticated()

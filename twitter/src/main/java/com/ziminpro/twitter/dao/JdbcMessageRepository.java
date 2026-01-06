@@ -55,9 +55,10 @@ public class JdbcMessageRepository implements MessageRepository {
         message.setId(UUID.randomUUID());
         message.setTimestamp(Instant.now().getEpochSecond());
         // check for empty message
-        if ((message.getAuthor() == null || message.getContent() == null)
-                & this.createProducer(message.getAuthor()) == null)
+        if (message.getAuthor() == null || message.getContent() == null) {
             return null;
+        }
+        this.createProducer(message.getAuthor());
 
         try {
             jdbcTemplate.update(Constants.CREATE_MESSAGE, message.getId().toString(), message.getAuthor().toString(),

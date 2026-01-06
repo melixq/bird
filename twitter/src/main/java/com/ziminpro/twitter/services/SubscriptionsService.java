@@ -22,104 +22,21 @@ import reactor.core.publisher.Mono;
 public class SubscriptionsService {
     private final SubscriptionRepository subscriptionRepository;
 
-    private final UMSConnector umsConnector;
-
-    @Value("${ums.paths.user}")
-    private String uriUser;
-
-    Map<String, Object> response = new HashMap<>();
-
-    public SubscriptionsService(SubscriptionRepository subscriptionRepository, UMSConnector umsConnector) {
+    public SubscriptionsService(SubscriptionRepository subscriptionRepository) {
         this.subscriptionRepository = subscriptionRepository;
-        this.umsConnector = umsConnector;
     }
 
-    public Mono<ResponseEntity<Map<String, Object>>> getSubscriptionsForSubscriberById(UUID subscriberId) {
-        return umsConnector.retrieveUmsData(uriUser + "/" + subscriberId.toString()).flatMap(res -> {
-            Subscription subscriptions = new Subscription();
-            User user = HttpResponseExtractor.extractDataFromHttpClientResponse(res, User.class);
-
-            if (user.hasRole(Roles.SUBSCRIBER)) {
-                subscriptions = subscriptionRepository.getSubscription(subscriberId);
-            }
-            if (subscriptions.getSubscriber() == null) {
-                response.put(Constants.CODE, "404");
-                response.put(Constants.MESSAGE,
-                        "Subscriptions for user with ID " + subscriberId.toString() + " is not found");
-                response.put(Constants.DATA, subscriptions);
-            } else {
-                response.put(Constants.CODE, "201");
-                response.put(Constants.MESSAGE, "Subscriptions have been retrieved");
-                response.put(Constants.DATA, subscriptions);
-            }
-            return Mono.just(ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, Constants.APPLICATION_JSON)
-                    .header(Constants.ACCEPT, Constants.APPLICATION_JSON).body(response));
-        });
+    public Mono<Subscription> getSubscriptions(UUID subscriberId) {
+        return Mono.fromCallable(() -> subscriptionRepository.getSubscription(subscriberId));
     }
 
-    public Mono<ResponseEntity<Map<String, Object>>> createSubscription(Subscription subscription) {
-        return umsConnector.retrieveUmsData(uriUser + "/" + subscription.getSubscriber().toString()).flatMap(res -> {
-            boolean subscriptionId = false;
-            User user = HttpResponseExtractor.extractDataFromHttpClientResponse(res, User.class);
-
-            if (user.hasRole(Roles.SUBSCRIBER)) {
-                subscriptionId = subscriptionRepository.createSubscription(subscription);
-            }
-            if (!subscriptionId) {
-                response.put(Constants.CODE, "500");
-                response.put(Constants.MESSAGE, "Subscriptions has not been created");
-                response.put(Constants.DATA, false);
-            } else {
-                response.put(Constants.CODE, "200");
-                response.put(Constants.MESSAGE, "Subscription has been created");
-                response.put(Constants.DATA, true);
-            }
-            return Mono.just(ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, Constants.APPLICATION_JSON)
-                    .header(Constants.ACCEPT, Constants.APPLICATION_JSON).body(response));
-        });
+    public void createSubscription(Subscription subscription) {
+        if (!subscriptionRepository.createSubscription(subscription)) {
+            throw new IllegalStateException("Subscription creation failed");
+        }
     }
 
-    public Mono<ResponseEntity<Map<String, Object>>> updateSubscriptionForSubscriberById(Subscription subscription) {
-        return umsConnector.retrieveUmsData(uriUser + "/" + subscription.getSubscriber().toString()).flatMap(res -> {
-            boolean subscriptionId = false;
-            User user = HttpResponseExtractor.extractDataFromHttpClientResponse(res, User.class);
-
-            if (user.hasRole(Roles.SUBSCRIBER)) {
-                subscriptionId = subscriptionRepository.updateSubscription(subscription);
-            }
-            if (!subscriptionId) {
-                response.put(Constants.CODE, "500");
-                response.put(Constants.MESSAGE, "Subscription has not been updated");
-                response.put(Constants.DATA, false);
-            } else {
-                response.put(Constants.CODE, "201");
-                response.put(Constants.MESSAGE, "Subscription has been updated");
-                response.put(Constants.DATA, true);
-            }
-            return Mono.just(ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, Constants.APPLICATION_JSON)
-                    .header(Constants.ACCEPT, Constants.APPLICATION_JSON).body(response));
-        });
-    }
-
-    public Mono<ResponseEntity<Map<String, Object>>> deleteSubscriptionForSubscriberById(UUID subscriberId) {
-        return umsConnector.retrieveUmsData(uriUser + "/" + subscriberId.toString()).flatMap(res -> {
-            boolean subscriptionId = false;
-            User user = HttpResponseExtractor.extractDataFromHttpClientResponse(res, User.class);
-
-            if (user.hasRole(Roles.SUBSCRIBER)) {
-                subscriptionId = subscriptionRepository.deleteSubscription(subscriberId);
-            }
-            if (!subscriptionId) {
-                response.put(Constants.CODE, "500");
-                response.put(Constants.MESSAGE, "Subscription has not been deleted");
-                response.put(Constants.DATA, false);
-            } else {
-                response.put(Constants.CODE, "201");
-                response.put(Constants.MESSAGE, "Subscription has been deleted");
-                response.put(Constants.DATA, true);
-            }
-            return Mono.just(ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, Constants.APPLICATION_JSON)
-                    .header(Constants.ACCEPT, Constants.APPLICATION_JSON).body(response));
-        });
+    public void deleteSubscription(UUID subscriberId) {
+        subscriptionRepository.deleteSubscription(subscriberId);
     }
 }

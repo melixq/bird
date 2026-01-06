@@ -1,21 +1,10 @@
 package com.ziminpro.twitter.services;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 import com.ziminpro.twitter.dao.MessageRepository;
-import com.ziminpro.twitter.dtos.Constants;
-import com.ziminpro.twitter.dtos.HttpResponseExtractor;
 import com.ziminpro.twitter.dtos.Message;
-import com.ziminpro.twitter.dtos.Roles;
-import com.ziminpro.twitter.dtos.User;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import reactor.core.publisher.Mono;
@@ -24,107 +13,33 @@ import reactor.core.publisher.Mono;
 public class MessagesService {
     private final MessageRepository messageRepository;
 
-    private final UMSConnector umsConnector;
-
-    @Value("${ums.paths.user}")
-    private String uriUser;
-
-    Map<String, Object> response = new HashMap<>();
-
-    public MessagesService(MessageRepository messageRepository, UMSConnector umsConnector) {
+    public MessagesService(MessageRepository messageRepository) {
         this.messageRepository = messageRepository;
-        this.umsConnector = umsConnector;
     }
 
-    public Mono<ResponseEntity<Map<String, Object>>> createMessage(Message message) {
-        return umsConnector.retrieveUmsData(uriUser + "/" + message.getAuthor().toString())
-            .flatMap(res -> {
-            UUID messageId = null;
-            User user = HttpResponseExtractor.extractDataFromHttpClientResponse(res, User.class);
-
-            if (user.hasRole(Roles.PRODUCER)) {
-                messageId = messageRepository.createMessage(message);
+    public Mono<UUID> createMessage(Message message) {
+        return Mono.fromCallable(() -> {
+            UUID id = messageRepository.createMessage(message);
+            if (id == null) {
+                throw new IllegalStateException("Message creation failed");
             }
-            if (messageId == null) {
-                response.put(Constants.CODE, "400");
-                response.put(Constants.MESSAGE, "Message has not been created");
-                response.put(Constants.DATA, "Something went wrong");
-            } else {
-                response.put(Constants.CODE, "201");
-                response.put(Constants.MESSAGE, "Message has been created");
-                response.put(Constants.DATA, messageId.toString());
-            }
-            return Mono.just(ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, Constants.APPLICATION_JSON)
-                    .header(Constants.ACCEPT, Constants.APPLICATION_JSON).body(response));
+            return id;
         });
     }
 
-    public Mono<ResponseEntity<Map<String, Object>>> getMessagebyId(UUID messageId) {
-        Message message = messageRepository.getMessagebyId(messageId);
-        if (message.getId() == null) {
-            response.put(Constants.CODE, "404");
-            response.put(Constants.MESSAGE, "Message not found");
-            response.put(Constants.DATA, message);
-        } else {
-            response.put(Constants.CODE, "200");
-            response.put(Constants.MESSAGE, "Message has been found");
-            response.put(Constants.DATA, message);
-        }
-        return Mono.just(ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, Constants.APPLICATION_JSON)
-                .header(Constants.ACCEPT, Constants.APPLICATION_JSON).body(response));
-
+    public Mono<Message> getMessageById(UUID messageId) {
+        return Mono.fromCallable(() -> messageRepository.getMessagebyId(messageId));
     }
 
-    public Mono<ResponseEntity<Map<String, Object>>> getMessagesForProducerById(UUID producerId) {
-        List<Message> messages = messageRepository.getMessagesForProducerById(producerId);
-        if (messages.isEmpty()) {
-            response.put(Constants.CODE, "404");
-            response.put(Constants.MESSAGE, "Either producer didn't produce any messages or producer not found");
-            response.put(Constants.DATA, new ArrayList<>());
-        } else {
-            response.put(Constants.CODE, "200");
-            response.put(Constants.MESSAGE, "List of messages has been requested successfully");
-            response.put(Constants.DATA, messages);
-        }
-        return Mono.just(ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, Constants.APPLICATION_JSON)
-                .header(Constants.ACCEPT, Constants.APPLICATION_JSON).body(response));
-
+    public Mono<List<Message>> getMessagesForProducerById(UUID producerId) {
+        return Mono.fromCallable(() -> messageRepository.getMessagesForProducerById(producerId));
     }
 
-    public Mono<ResponseEntity<Map<String, Object>>> getMessagesForSubscriberById(UUID subscriberId) {
-        return umsConnector.retrieveUmsData(uriUser + "/" + subscriberId.toString()).flatMap(res -> {
-            User user = HttpResponseExtractor.extractDataFromHttpClientResponse(res, User.class);
-            List<Message> messages = new ArrayList<>();
-
-            if (user.hasRole(Roles.SUBSCRIBER)) {
-                messages = messageRepository.getMessagesForSubscriberById(subscriberId);
-            }
-            if (messages.isEmpty()) {
-                response.put(Constants.CODE, "404");
-                response.put(Constants.MESSAGE, "Subscription not found or empty");
-                response.put(Constants.DATA, new ArrayList<>());
-            } else {
-                response.put(Constants.CODE, "200");
-                response.put(Constants.MESSAGE, "List of messages has been requested successfully");
-                response.put(Constants.DATA, messages);
-            }
-            return Mono.just(ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, Constants.APPLICATION_JSON)
-                    .header(Constants.ACCEPT, Constants.APPLICATION_JSON).body(response));
-        });
+    public Mono<List<Message>> getMessagesForSubscriberById(UUID subscriberId) {
+        return Mono.fromCallable(() -> messageRepository.getMessagesForSubscriberById(subscriberId));
     }
 
-    public Mono<ResponseEntity<Map<String, Object>>> deleteMessageById(UUID messageId) {
-        int result = messageRepository.deleteMessageById(messageId);
-        if (result != 1) {
-            response.put(Constants.CODE, "500");
-            response.put(Constants.MESSAGE, "Message " + messageId.toString() + " has not been deleted");
-            response.put(Constants.DATA, false);
-        } else {
-            response.put(Constants.CODE, "200");
-            response.put(Constants.MESSAGE, "Message " + messageId.toString() + " successfully deleted");
-            response.put(Constants.DATA, true);
-        }
-        return Mono.just(ResponseEntity.ok().header(HttpHeaders.CONTENT_TYPE, Constants.APPLICATION_JSON)
-                .header(Constants.ACCEPT, Constants.APPLICATION_JSON).body(response));
+    public void deleteMessageById(UUID messageId) {
+        messageRepository.deleteMessageById(messageId);
     }
 }
