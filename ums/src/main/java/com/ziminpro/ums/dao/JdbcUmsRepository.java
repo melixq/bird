@@ -31,6 +31,7 @@ public class JdbcUmsRepository implements UmsRepository {
         String email = rs.getString("users.email");
         String password = rs.getString("users.password");
         String githubId = rs.getString("users.github_id");
+        String avatarUrl = rs.getString("users.avatar_url");
         Integer created = rs.getInt("users.created");
 
         LastSession lastSession = null;
@@ -56,6 +57,7 @@ public class JdbcUmsRepository implements UmsRepository {
         user.setEmail(email);
         user.setPassword(password);
         user.setGithubId(githubId);
+        user.setAvatarUrl(avatarUrl);
         user.setCreated(created);
         user.setLastSession(lastSession);
 
@@ -81,6 +83,7 @@ public class JdbcUmsRepository implements UmsRepository {
                 newUser.setPassword(user.getPassword());
                 newUser.setGithubId(user.getGithubId());
                 newUser.setCreated(user.getCreated());
+                newUser.setAvatarUrl(user.getAvatarUrl());
                 newUser.setLastSession(user.getLastSession());
                 users.put(user.getId(), newUser);
             }
@@ -107,6 +110,7 @@ public class JdbcUmsRepository implements UmsRepository {
                 user.setEmail(u.getEmail());
                 user.setPassword(u.getPassword());
                 user.setGithubId(u.getGithubId());
+                user.setAvatarUrl(u.getAvatarUrl());
                 user.setCreated(u.getCreated());
                 user.setLastSession(u.getLastSession());
             }
@@ -133,6 +137,7 @@ public class JdbcUmsRepository implements UmsRepository {
                 user.setEmail(u.getEmail());
                 user.setPassword(u.getPassword());
                 user.setGithubId(u.getGithubId());
+                user.setAvatarUrl(u.getAvatarUrl());
                 user.setCreated(u.getCreated());
                 user.setLastSession(u.getLastSession());
             }
@@ -159,6 +164,7 @@ public class JdbcUmsRepository implements UmsRepository {
                 user.setEmail(u.getEmail());
                 user.setPassword(u.getPassword());
                 user.setGithubId(u.getGithubId());
+                user.setAvatarUrl(u.getAvatarUrl());
                 user.setCreated(u.getCreated());
                 user.setLastSession(u.getLastSession());
             }
@@ -206,6 +212,7 @@ public class JdbcUmsRepository implements UmsRepository {
                         Constants.UPDATE_USER_BY_GITHUB_ID,
                         user.getName(),
                         user.getEmail(),
+                        user.getAvatarUrl(),
                         user.getGithubId()
                 );
                 return existingUser.getId();
@@ -224,6 +231,7 @@ public class JdbcUmsRepository implements UmsRepository {
                         user.getName(),
                         user.getEmail(),
                         user.getGithubId(),
+                        user.getAvatarUrl(),
                         timestamp,
                         0
                 );

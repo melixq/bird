@@ -43,6 +43,7 @@ public class OAuth2AuthenticationSuccessHandler implements ServerAuthenticationS
                 githubUser.setId(Objects.requireNonNull(oauth2User.getAttribute("id")).toString());
                 githubUser.setLogin(oauth2User.getAttribute("login"));
                 githubUser.setName(oauth2User.getAttribute("name"));
+                githubUser.setAvatarUrl(oauth2User.getAttribute("avatar_url"));
 
                 // User can make their email private on GitHub, so it will be null
                 String email = oauth2User.getAttribute("email");

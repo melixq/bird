@@ -27,6 +27,7 @@ public class AuthenticationService {
                 .name(gitHubUser.getName() != null ? gitHubUser.getName() : gitHubUser.getLogin())
                 .email(gitHubUser.getEmail())
                 .githubId(gitHubUser.getId())
+                .avatarUrl(gitHubUser.getAvatarUrl())
                 .build();
 
         UUID userId = umsRepository.createOrUpdateGithubUser(user);
