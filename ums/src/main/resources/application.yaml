@@ -18,7 +18,7 @@ spring:
             client-id: ${GITHUB_CLIENT_ID}
             client-secret: ${GITHUB_CLIENT_SECRET}
             scope: read:user,user:email
-            redirect-uri: "{baseUrl}/oauth2/callback/{registrationId}"
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
             authorization-grant-type: authorization_code
         provider:
           github:
