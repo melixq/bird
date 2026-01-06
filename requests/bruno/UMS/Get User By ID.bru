@@ -6,8 +6,12 @@ meta {
 
 get {
   url: http://localhost:9000/users/user/d040e3c8-17d1-44c9-88e7-d14b9d848d0c
-  body: json
-  auth: inherit
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiJkMDQwZTNjOC0xN2QxLTQ0YzktODhlNy1kMTRiOWQ4NDhkMGMiLCJqdGkiOiI0ZmQyOTdiZS05ZmVkLTQ5NDItYTYyMC1kNDQ3MThjMTZlMTAiLCJlbWFpbCI6Im1lbGl4cUBnaXRodWIubG9jYWwiLCJuYW1lIjoiS3V6bmV0c292IE1heGltIiwicm9sZXMiOlsiU1VCU0NSSUJFUiIsIlBST0RVQ0VSIl0sInR5cGUiOiJhY2Nlc3MiLCJpYXQiOjE3Njc3MTc1MDMsImV4cCI6MTc2NzcxODQwM30.mN6kxCwP0YDMMzqJwH5C-0QYQtHr5IkTF4ZgLk8HsLnOfLfxw0TPx8J7eaxntLcCSVF7oMwIEqmdT0GC3lOayQ
 }
 
 settings {
