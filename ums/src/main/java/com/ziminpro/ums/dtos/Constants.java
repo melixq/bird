@@ -45,8 +45,8 @@ public class Constants {
             + " (`id`, `name`, `email`, `password`, `created`, `last_visit_id`) VALUES "
             + "(UUID_TO_BIN(?), ?, ?, ?, ?, UUID_TO_BIN(?));";
     public static final String CREATE_USER_WITH_GITHUB = "INSERT INTO " + TABLE_USERS
-            + " (`id`, `name`, `email`, `github_id`, `password`, `created`, `last_visit_id`) VALUES "
-            + "(UUID_TO_BIN(?), ?, ?, ?, NULL, ?, NULL);";
+            + " (`id`, `name`, `email`, `github_id`, `password`, `created`, `last_visit_id`, `token_version`) VALUES "
+            + "(UUID_TO_BIN(?), ?, ?, ?, NULL, ?, NULL, ?);";
     public static final String UPDATE_USER_BY_GITHUB_ID = "UPDATE " + TABLE_USERS
             + " SET `name`=?, `email`=? WHERE `github_id`=?;";
     public static final String ASSIGN_ROLE = "INSERT INTO " + TABLE_USERS_ROLES
