@@ -82,6 +82,7 @@ ALTER TABLE `users` ADD COLUMN `github_id` varchar(100) DEFAULT NULL AFTER `emai
 ALTER TABLE `users` ADD UNIQUE KEY `idx_github_id` (`github_id`);
 ALTER TABLE `users` MODIFY `password` varchar(255) DEFAULT NULL;
 ALTER TABLE `users` ADD COLUMN `token_version` INT DEFAULT 0 after `password`;
+ALTER TABLE `users` ADD COLUMN `avatar_url` varchar(100) DEFAULT NULL after `github_id`;
 
 INSERT INTO `last_visit` (`id`, `in`, `out`) VALUES
 (X'306DCF05D3D64B438E066B6FFE2331FC', '1604249194', '1604249224'),

@@ -19,21 +19,11 @@ public class User {
     private String email;
     private String password;
     private String githubId;
+    private String avatarUrl;
     private Integer created;
     private List<Roles> roles;
     private Integer tokenVersion;
     private LastSession lastSession;
-
-    public User(UUID id, String name, String email, String password, Integer created,
-                List<Roles> roles, LastSession lastSession) {
-        this.id = id;
-        this.name = name;
-        this.email = email;
-        this.password = password;
-        this.created = created;
-        this.roles = roles;
-        this.lastSession = lastSession;
-    }
 
     public boolean hasRole(Roles role) {
         return roles != null && roles.contains(role);

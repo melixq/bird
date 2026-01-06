@@ -12,13 +12,16 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class User {
-    UUID id;
-    String name;
-    String email;
-    String password;
-    int created;
-    List<Roles> roles = new ArrayList<>();
-    LastSession lastSession;
+    private UUID id;
+    private String name;
+    private String email;
+    private String password;
+    private String githubId;
+    private String avatarUrl;
+    private Integer created;
+    private List<Roles> roles = new ArrayList<>();
+    private Integer tokenVersion;
+    private LastSession lastSession;
 
     public void addRole(Roles role) {
         this.roles.add(role);
