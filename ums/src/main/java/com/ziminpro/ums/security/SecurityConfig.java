@@ -29,9 +29,12 @@ public class SecurityConfig {
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers(
                                 "/oauth2/**",
+                                "/login/oauth2/**",
                                 "/auth/login",
                                 "/auth/refresh",
                                 "/auth/validate",
+                                "/auth/me",
+                                "/auth/logout",
                                 "/roles"
                         ).permitAll()
                         .anyExchange().authenticated()

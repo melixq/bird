@@ -1,6 +1,5 @@
 package com.ziminpro.ums.services;
 
-import com.ziminpro.ums.dao.SessionRepository;
 import com.ziminpro.ums.dao.UmsRepository;
 import com.ziminpro.ums.dtos.*;
 import org.springframework.stereotype.Service;
@@ -10,12 +9,16 @@ import java.util.UUID;
 @Service
 public class AuthenticationService {
     private final UmsRepository umsRepository;
-    private final SessionRepository sessionRepository;
+    private final TokenBlacklistService tokenBlacklistService;
     private final JwtService jwtService;
 
-    public AuthenticationService(UmsRepository umsRepository, SessionRepository sessionRepository, JwtService jwtService) {
+    public AuthenticationService(
+            UmsRepository umsRepository,
+            TokenBlacklistService tokenBlacklistService,
+            JwtService jwtService
+    ) {
         this.umsRepository = umsRepository;
-        this.sessionRepository = sessionRepository;
+        this.tokenBlacklistService = tokenBlacklistService;
         this.jwtService = jwtService;
     }
 
@@ -33,26 +36,10 @@ public class AuthenticationService {
         }
 
         User completeUser = umsRepository.findUserByID(userId);
-        sessionRepository.deactivateAllUserSessions(userId);
 
-        String accessToken = jwtService.generateAccessToken(completeUser);
-        String refreshToken = jwtService.generateRefreshToken(completeUser);
-
-        long now = System.currentTimeMillis();
-        Session session = Session.builder()
-                .userId(userId)
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .accessTokenExpiresAt(now + jwtService.getAccessTokenExpiration())
-                .refreshTokenExpiresAt(now + jwtService.getRefreshTokenExpiration())
-                .githubId(gitHubUser.getId())
-                .githubUsername(gitHubUser.getLogin())
-                .createdAt(now)
-                .lastAccessedAt(now)
-                .isActive(true)
-                .build();
-
-        sessionRepository.createSession(session);
+        String jti = UUID.randomUUID().toString();
+        String accessToken = jwtService.generateAccessToken(completeUser, jti);
+        String refreshToken = jwtService.generateRefreshToken(completeUser, jti);
 
         return AuthResponse.builder()
                 .accessToken(accessToken)
@@ -65,6 +52,8 @@ public class AuthenticationService {
 
     public AuthResponse refreshAccessToken(String refreshToken) {
         try {
+            JwtClaims refreshTokenClaims = validateToken(refreshToken);
+
             if (jwtService.isTokenExpired(refreshToken)) {
                 throw new RuntimeException("Refresh token expired");
             }
@@ -74,24 +63,28 @@ public class AuthenticationService {
                 throw new RuntimeException("Invalid token type");
             }
 
-            Session session = sessionRepository.findSessionByRefreshToken(refreshToken);
-            if (session == null || !session.getIsActive()) {
-                throw new RuntimeException("Session not found or inactive");
+            var userId = jwtService.getUserIdFromToken(refreshToken);
+            if (tokenBlacklistService.isTokenBlacklisted(refreshTokenClaims.getJti())) {
+                throw new RuntimeException("Token has been revoked");
             }
 
-            User user = umsRepository.findUserByID(session.getUserId());
+            tokenBlacklistService.blacklistToken(
+                    refreshTokenClaims.getJti(),
+                    refreshTokenClaims.getExpiresAt()
+            );
+
+            User user = umsRepository.findUserByID(userId);
             if (user.getId() == null) {
                 throw new RuntimeException("User not found");
             }
 
-            String newAccessToken = jwtService.generateAccessToken(user);
-            long expiresAt = System.currentTimeMillis() + jwtService.getAccessTokenExpiration();
-
-            sessionRepository.updateSessionAccessToken(session.getId(), newAccessToken, expiresAt);
+            String newJti = UUID.randomUUID().toString();
+            String newAccessToken = jwtService.generateAccessToken(user, newJti);
+            String newRefreshToken = jwtService.generateRefreshToken(user, newJti);
 
             return AuthResponse.builder()
                     .accessToken(newAccessToken)
-                    .refreshToken(refreshToken)
+                    .refreshToken(newRefreshToken)
                     .expiresIn(jwtService.getAccessTokenExpiration() / 1000)
                     .tokenType("Bearer")
                     .user(user)
@@ -102,12 +95,40 @@ public class AuthenticationService {
         }
     }
 
-    public boolean logout(String accessToken) {
-        Session session = sessionRepository.findSessionByAccessToken(accessToken);
-        if (session != null) {
-            return sessionRepository.deactivateSession(session.getId());
+    public LogoutResponse logout(String accessToken) {
+        try {
+            JwtClaims claims = validateToken(accessToken);
+            if (claims == null) {
+                return LogoutResponse.builder()
+                        .success(false)
+                        .message("Invalid token")
+                        .build();
+            }
+
+            boolean blacklisted = tokenBlacklistService.blacklistToken(
+                    claims.getJti(),
+                    claims.getExpiresAt()
+            );
+
+            if (blacklisted) {
+                return LogoutResponse.builder()
+                        .success(true)
+                        .message("Successfully logged out")
+                        .logoutTime(System.currentTimeMillis())
+                        .tokenExpiresAt(claims.getExpiresAt())
+                        .build();
+            } else {
+                return LogoutResponse.builder()
+                        .success(false)
+                        .message("Failed to blacklist token")
+                        .build();
+            }
+        } catch (Exception e) {
+            return LogoutResponse.builder()
+                    .success(false)
+                    .message("Logout failed: " + e.getMessage())
+                    .build();
         }
-        return false;
     }
 
     public JwtClaims validateToken(String token) {

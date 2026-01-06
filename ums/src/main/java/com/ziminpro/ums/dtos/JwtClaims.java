@@ -17,6 +17,8 @@ public class JwtClaims {
     private String email;
     private String name;
     private List<String> roles;
+    private String jti; // JWT ID for blacklisting
+    private Integer tokenVersion; // For invalidating all tokens
     private Long issuedAt;
     private Long expiresAt;
 }

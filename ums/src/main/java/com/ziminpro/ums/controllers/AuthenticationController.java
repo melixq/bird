@@ -79,9 +79,9 @@ public class AuthenticationController {
         Map<String, Object> response = new HashMap<>();
         try {
             String token = authHeader.replace("Bearer ", "");
-            boolean success = authenticationService.logout(token);
+            LogoutResponse logoutResponse = authenticationService.logout(token);
 
-            if (success) {
+            if (logoutResponse.isSuccess()) {
                 response.put(Constants.CODE, "200");
                 response.put(Constants.MESSAGE, "Logged out successfully");
                 response.put(Constants.DATA, true);

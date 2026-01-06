@@ -59,7 +59,7 @@ CREATE TABLE `users_has_roles` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 DROP TABLE IF EXISTS `sessions`;
-CREATE TABLE `sessions` (
+/*CREATE TABLE `sessions` (
     `id` binary(16) NOT NULL,
     `user_id` binary(16) NOT NULL,
     `access_token` varchar(512) NOT NULL,
@@ -76,11 +76,12 @@ CREATE TABLE `sessions` (
     KEY `idx_access_token` (`access_token`(255)),
     KEY `idx_refresh_token` (`refresh_token`(255)),
     CONSTRAINT `fk_sessions_users` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;*/
 
 ALTER TABLE `users` ADD COLUMN `github_id` varchar(100) DEFAULT NULL AFTER `email`;
 ALTER TABLE `users` ADD UNIQUE KEY `idx_github_id` (`github_id`);
 ALTER TABLE `users` MODIFY `password` varchar(255) DEFAULT NULL;
+ALTER TABLE `users` ADD COLUMN `token_version` INT DEFAULT 0 after `password`;
 
 INSERT INTO `last_visit` (`id`, `in`, `out`) VALUES
 (X'306DCF05D3D64B438E066B6FFE2331FC', '1604249194', '1604249224'),

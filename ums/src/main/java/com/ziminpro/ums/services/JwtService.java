@@ -36,12 +36,14 @@ public class JwtService {
         this.refreshTokenExpiration = refreshTokenExpiration;
     }
 
-    public String generateAccessToken(User user) {
+    public String generateAccessToken(User user, String jti) {
         var now = new Date();
         var expiryDate = new Date(now.getTime() + accessTokenExpiration);
 
         return Jwts.builder()
                 .subject(user.getId().toString())
+                .claim("jti", jti)
+                .claim("tokenVersion", user.getTokenVersion())
                 .claim("email", user.getEmail())
                 .claim("name", user.getName())
                 .claim("roles", user.getRoles().stream()
@@ -54,13 +56,15 @@ public class JwtService {
                 .compact();
     }
 
-    public String generateRefreshToken(User user) {
+    public String generateRefreshToken(User user, String jti) {
         var now = new Date();
         var expiryDate = new Date(now.getTime() + refreshTokenExpiration);
 
         return Jwts.builder()
                 .subject(user.getId().toString())
                 .claim("type", "refresh")
+                .claim("jti", jti)
+                .claim("tokenVersion", user.getTokenVersion())
                 .issuedAt(now)
                 .expiration(expiryDate)
                 .signWith(secretKey, Jwts.SIG.HS512)
@@ -81,6 +85,8 @@ public class JwtService {
                     .userId(UUID.fromString(claims.getSubject()))
                     .email(claims.get("email", String.class))
                     .name(claims.get("name", String.class))
+                    .jti(claims.get("jti", String.class))
+                    .tokenVersion(claims.get("tokenVersion", Integer.class))
                     .roles(roles)
                     .issuedAt(claims.getIssuedAt().getTime())
                     .expiresAt(claims.getExpiration().getTime())
