@@ -5,11 +5,9 @@ import java.util.UUID;
 
 import com.ziminpro.twitter.dtos.Message;
 import com.ziminpro.twitter.services.MessagesService;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -38,26 +36,14 @@ public class MessageController {
     }
 
     @PostMapping
-    public Mono<UUID> createMessage(
-            @RequestBody Message message,
-            Authentication authentication) {
-
-        boolean isProducer = authentication.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_PRODUCER"));
-
-        if (!isProducer) {
-            return Mono.error(new ResponseStatusException(HttpStatus.FORBIDDEN));
-        }
-
+    public Mono<UUID> createMessage(@RequestBody Message message, Authentication authentication) {
         UUID userId = UUID.fromString(authentication.getPrincipal().toString());
-        message.setAuthor(userId);
-
-        return messagesService.createMessage(message);
+        return messagesService.createMessage(message, userId, authentication.getAuthorities());
     }
 
     @DeleteMapping("/{message-id}")
-    public Mono<Void> deleteMessage(@PathVariable("message-id") UUID messageId) {
-        messagesService.deleteMessageById(messageId);
-        return Mono.empty();
+    public Mono<Void> deleteMessage(@PathVariable("message-id") UUID messageId, Authentication authentication) {
+        UUID userId = UUID.fromString(authentication.getPrincipal().toString());
+        return messagesService.deleteMessageById(messageId, userId, authentication.getAuthorities());
     }
 }
