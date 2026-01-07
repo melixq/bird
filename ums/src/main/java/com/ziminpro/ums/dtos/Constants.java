@@ -56,4 +56,5 @@ public class Constants {
     public static final String GET_ROLE_BY_NAME = "SELECT * FROM " + TABLE_ROLES + " WHERE `name`=?;";
     public static final String DELETE_USER = "DELETE FROM " + TABLE_USERS + " WHERE `id` = (UUID_TO_BIN(?));";
     public static final String DELETE_LAST_VISIT = "DELETE FROM " + TABLE_LAST_VISIT + " WHERE `id` = (UUID_TO_BIN(?));";
+    public static final String UPDATE_USER = "UPDATE " + TABLE_USERS + " SET name = ?, avatar_url = ? WHERE id = UUID_TO_BIN(?)";
 }

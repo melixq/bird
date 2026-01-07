@@ -7,23 +7,24 @@ import java.util.Map;
 import com.ziminpro.ums.dao.UmsRepository;
 import com.ziminpro.ums.dtos.Constants;
 import com.ziminpro.ums.dtos.Roles;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import reactor.core.publisher.Mono;
 
-@RestController
+@RestController()
+@RequestMapping("/roles")
 public class RolesController {
-
-    @Autowired
-    private UmsRepository umsRepository;
-
+    private final UmsRepository umsRepository;
     Map<String, Object> response = new HashMap<>();
 
-    @RequestMapping(method = RequestMethod.GET, path = "/roles")
+    public RolesController(UmsRepository umsRepository) {
+        this.umsRepository = umsRepository;
+    }
+
+    @GetMapping
     public Mono<ResponseEntity<Map<String, Object>>> getAllRoles() {
         Map<String, Roles> roles = umsRepository.findAllRoles();
         if (roles == null) {

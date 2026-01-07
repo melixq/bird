@@ -11,11 +11,12 @@ import com.ziminpro.ums.dtos.Constants;
 import com.ziminpro.ums.dtos.LastSession;
 import com.ziminpro.ums.dtos.Roles;
 import com.ziminpro.ums.dtos.User;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+
+import static com.ziminpro.ums.dtos.Constants.UPDATE_USER;
 
 @Repository
 public class JdbcUmsRepository implements UmsRepository {
@@ -203,6 +204,16 @@ public class JdbcUmsRepository implements UmsRepository {
         }
 
         return userId;
+    }
+
+    @Override
+    public void updateUser(User user) {
+        jdbcTemplate.update(
+                UPDATE_USER,
+                user.getName(),
+                user.getAvatarUrl(),
+                user.getId().toString()
+        );
     }
 
     @Override

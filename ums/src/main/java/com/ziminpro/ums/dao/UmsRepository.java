@@ -7,7 +7,6 @@ import com.ziminpro.ums.dtos.Roles;
 import com.ziminpro.ums.dtos.User;
 
 public interface UmsRepository {
-
     Map<UUID, User> findAllUsers();
 
     Map<String, Roles> findAllRoles();
@@ -15,6 +14,7 @@ public interface UmsRepository {
     User findUserByID(UUID userId);
 
     UUID createUser(User user);
+    void updateUser(User user);
 
 	int deleteUser(UUID userId);
 

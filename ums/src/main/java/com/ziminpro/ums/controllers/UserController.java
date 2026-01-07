@@ -1,92 +1,131 @@
 package com.ziminpro.ums.controllers;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
-import com.ziminpro.ums.dao.UmsRepository;
-import com.ziminpro.ums.dtos.Constants;
-import com.ziminpro.ums.dtos.User;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.ziminpro.ums.dtos.*;
+import com.ziminpro.ums.mappers.UserMapper;
+import com.ziminpro.ums.services.UserService;
+import com.ziminpro.ums.utils.SecurityUtils;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import reactor.core.publisher.Mono;
 
 @RestController
+@RequestMapping("/users")
 public class UserController {
+    private final UserService userService;
 
-    @Autowired
-    private UmsRepository umsRepository;
-
-    Map<String, Object> response = new HashMap<>();
-
-    @RequestMapping(method = RequestMethod.GET, path = "/users")
-    public Mono<ResponseEntity<Map<String, Object>>> getAllUsers() {
-        Map<UUID, User> users = umsRepository.findAllUsers();
-        if (users == null) {
-            response.put(Constants.CODE, "500");
-            response.put(Constants.MESSAGE, "Users have not been retrieved");
-            response.put(Constants.DATA, new HashMap<>());
-        } else {
-            response.put(Constants.CODE, "200");
-            response.put(Constants.MESSAGE, "List of Users has been requested successfully");
-            response.put(Constants.DATA, new ArrayList<>(users.values()));
-        }
-        return Mono.just(ResponseEntity.ok().header(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON)
-                .header(Constants.ACCEPT, Constants.APPLICATION_JSON).body(response));
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
-    @RequestMapping(method = RequestMethod.GET, path = "/users/user/{user-id}")
-    public Mono<ResponseEntity<Map<String, Object>>> getUser(@PathVariable(value = "user-id", required = true) String userId) {
-        User user = umsRepository.findUserByID(UUID.fromString(userId));
+    @GetMapping
+    public Mono<ResponseEntity<ApiResponse<List<PublicUserResponse>>>> getAllUsers() {
+        List<PublicUserResponse> users =
+                userService.getAllUsers().values().stream()
+                        .map(UserMapper::toPublic)
+                        .toList();
+
+        return Mono.just(ResponseEntity.ok(ApiResponse.success(users)));
+    }
+
+    @GetMapping("/{userId}")
+    public Mono<ResponseEntity<ApiResponse<?>>> getUser(@PathVariable UUID userId) {
+        User user = userService.getUserById(userId);
+
         if (user.getId() == null) {
-            response.put(Constants.CODE, "404");
-            response.put(Constants.MESSAGE, "User have not been found");
-            response.put(Constants.DATA, new User());
-        } else {
-            response.put(Constants.CODE, "200");
-            response.put(Constants.MESSAGE, "User has been retrieved successfully");
-            response.put(Constants.DATA, user);
+            return Mono.just(
+                    ResponseEntity.status(404)
+                            .body(ApiResponse.error(404, "User not found"))
+            );
         }
-        return Mono.just(ResponseEntity.ok().header(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON)
-                .header(Constants.ACCEPT, Constants.APPLICATION_JSON).body(response));
+
+        return Mono.zip(
+                SecurityUtils.currentUserId(),
+                SecurityUtils.isAdmin()
+        ).map(tuple -> {
+            boolean isSelf = tuple.getT1().equals(userId);
+            boolean isAdmin = tuple.getT2();
+
+            if (isSelf || isAdmin) {
+                return ResponseEntity.ok(
+                        ApiResponse.success(UserMapper.toPrivate(user))
+                );
+            }
+
+            return ResponseEntity.ok(
+                    ApiResponse.success(UserMapper.toPublic(user))
+            );
+        });
     }
 
-    @RequestMapping(method = RequestMethod.POST, path = "/users/user", consumes = Constants.APPLICATION_JSON)
-    public Mono<ResponseEntity<Map<String, Object>>> createUser(@RequestBody User user) {
-        UUID userId = umsRepository.createUser(user);
-        if (userId == null) {
-            response.put(Constants.CODE, "500");
-            response.put(Constants.MESSAGE, "User has not been created");
-            response.put(Constants.DATA, "Check email for duplicates first");
-        } else {
-            response.put(Constants.CODE, "201");
-            response.put(Constants.MESSAGE, "User created");
-            response.put(Constants.DATA, userId.toString());
-        }
-        return Mono.just(ResponseEntity.ok().header(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON)
-                .header(Constants.ACCEPT, Constants.APPLICATION_JSON).body(response));
+    @PutMapping("/{userId}")
+    public Mono<ResponseEntity<ApiResponse<PrivateUserResponse>>> updateUser(
+            @PathVariable UUID userId,
+            @RequestBody UpdateUserRequest request
+    ) {
+        return Mono.zip(
+                SecurityUtils.currentUserId(),
+                SecurityUtils.isAdmin()
+        ).map(tuple -> {
+            User updated = userService.updateUser(
+                    tuple.getT1(),
+                    tuple.getT2(),
+                    userId,
+                    request
+            );
+            return ResponseEntity.ok(
+                    ApiResponse.success(UserMapper.toPrivate(updated))
+            );
+        });
     }
 
-    @RequestMapping(method = RequestMethod.DELETE, path = "/users/user/{user-id}")
-    public Mono<ResponseEntity<Map<String, Object>>> deleteUser(@PathVariable(value = "user-id", required = true) String userId) {
-        int result = umsRepository.deleteUser(UUID.fromString(userId));
-        if (result != 1) {
-            response.put(Constants.CODE, "500");
-            response.put(Constants.MESSAGE, "Error happened while deleting user");
-            response.put(Constants.DATA, userId);
-        } else {
-            response.put(Constants.CODE, "200");
-            response.put(Constants.MESSAGE, "User deleted");
-            response.put(Constants.DATA, userId.toString());
-        }
-        return Mono.just(ResponseEntity.ok().header(Constants.CONTENT_TYPE, Constants.APPLICATION_JSON)
-                .header(Constants.ACCEPT, Constants.APPLICATION_JSON).body(response));
+    @PutMapping("/me")
+    public Mono<ResponseEntity<ApiResponse<User>>> updateSelf(@RequestBody UpdateUserRequest update) {
+        return Mono.zip(
+                SecurityUtils.currentUserId(),
+                SecurityUtils.isAdmin()
+        ).map(tuple -> {
+            User updated = userService.updateUser(
+                    tuple.getT1(),
+                    tuple.getT2(),
+                    tuple.getT1(),
+                    update
+            );
+            return ResponseEntity.ok(ApiResponse.success(updated));
+        });
+    }
+
+    @DeleteMapping("/{userId}")
+    public Mono<ResponseEntity<ApiResponse<Void>>> deleteUser(@PathVariable UUID userId) {
+        return Mono.zip(
+                SecurityUtils.currentUserId(),
+                SecurityUtils.isAdmin()
+        ).doOnNext(tuple ->
+                userService.deleteUser(
+                        tuple.getT1(),
+                        tuple.getT2(),
+                        userId
+                )
+        ).thenReturn(
+                ResponseEntity.ok(ApiResponse.success(null))
+        );
+    }
+
+    @DeleteMapping("/me")
+    public Mono<ResponseEntity<ApiResponse<Void>>> deleteSelf() {
+        return Mono.zip(
+                SecurityUtils.currentUserId(),
+                SecurityUtils.isAdmin()
+        ).doOnNext(tuple ->
+                userService.deleteUser(
+                        tuple.getT1(),
+                        tuple.getT2(),
+                        tuple.getT1()
+                )
+        ).thenReturn(
+                ResponseEntity.ok(ApiResponse.success(null))
+        );
     }
 }

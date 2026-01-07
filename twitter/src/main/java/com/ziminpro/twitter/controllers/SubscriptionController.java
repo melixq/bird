@@ -12,12 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import reactor.core.publisher.Mono;
 
-// TODO:
-// - Fix unability to call UMS endpoints outside browser
-// - Update UI
-// - Store avatar url in JWT
-
-
 @RestController
 @RequestMapping("/subscriptions")
 public class SubscriptionController {

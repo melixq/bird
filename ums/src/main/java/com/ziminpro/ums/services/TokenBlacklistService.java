@@ -10,10 +10,9 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class TokenBlacklistService {
     private final ConcurrentHashMap<String, Long> tokenBlacklist = new ConcurrentHashMap<>();
-    private final ScheduledExecutorService cleanupScheduler =
-            Executors.newScheduledThreadPool(1);
 
     public TokenBlacklistService() {
+        ScheduledExecutorService cleanupScheduler = Executors.newScheduledThreadPool(1);
         cleanupScheduler.scheduleAtFixedRate(this::cleanupExpiredTokens, 1, 1, TimeUnit.HOURS);
     }
 
