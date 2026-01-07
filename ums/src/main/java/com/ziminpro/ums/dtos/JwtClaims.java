@@ -16,6 +16,7 @@ public class JwtClaims {
     private UUID userId;
     private String email;
     private String name;
+    private String avatarUrl;
     private List<String> roles;
     private String jti; // JWT ID for blacklisting
     private Integer tokenVersion; // For invalidating all tokens
