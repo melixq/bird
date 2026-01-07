@@ -1,0 +1,22 @@
+meta {
+  name: Refresh JWT
+  type: http
+  seq: 10
+}
+
+post {
+  url: http://localhost:9000/auth/refresh
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "refreshToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIwZGEzMGFhYi1lYmRiLTRmOWQtOWQ3MC01MjE5YjFhOGU2NjQiLCJ0eXBlIjoicmVmcmVzaCIsImp0aSI6IjYzYmRhM2JkLTY5MmEtNDNlYS04MDJlLThiNjhjMTYxZWM1MCIsImlhdCI6MTc2Nzc3OTY5OCwiZXhwIjoxNzY4Mzg0NDk4fQ.tjchxxKUL7tA8wdQQ27y2BxjuryD4FVmlOnHq1C_a1r_uCVoQRmeZitP5IVCI_lyZG210Wa6JUjEaCo6HGZ87Q"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

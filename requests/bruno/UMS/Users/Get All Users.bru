@@ -1,15 +1,16 @@
 meta {
-  name: Login
+  name: Get All Users
   type: http
-  seq: 6
+  seq: 2
 }
 
 get {
-  url: http://localhost:9000/auth/login
+  url: http://127.0.0.1:9000/users
   body: none
   auth: inherit
 }
 
 settings {
   encodeUrl: true
+  timeout: 0
 }
