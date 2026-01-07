@@ -5,8 +5,9 @@ import java.util.UUID;
 import com.ziminpro.twitter.dtos.Subscription;
 
 public interface SubscriptionRepository {
-    public Subscription getSubscription(UUID subscriberId);
-    public boolean createSubscription(Subscription subscription);
-    public boolean updateSubscription(Subscription subscription);
-    public boolean deleteSubscription(UUID subscriberId);
+    Subscription getSubscription(UUID subscriberId);
+    UUID createSubscription(Subscription subscription);
+    UUID updateSubscription(Subscription subscription);
+    boolean deleteSubscription(UUID subscriberId); // Delete all subscriptions for a user
+    boolean deleteSingleSubscription(UUID subscriberId, UUID producerId);
 }

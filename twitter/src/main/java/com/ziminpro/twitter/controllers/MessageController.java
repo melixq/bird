@@ -37,8 +37,8 @@ public class MessageController {
 
     @PostMapping
     public Mono<UUID> createMessage(@RequestBody Message message, Authentication authentication) {
-        UUID userId = UUID.fromString(authentication.getPrincipal().toString());
-        return messagesService.createMessage(message, userId, authentication.getAuthorities());
+        UUID authorId = UUID.fromString(authentication.getPrincipal().toString());
+        return messagesService.createMessage(message, authorId, authentication.getAuthorities());
     }
 
     @DeleteMapping("/{message-id}")

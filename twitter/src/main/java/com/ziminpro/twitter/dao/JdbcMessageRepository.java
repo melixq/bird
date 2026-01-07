@@ -8,17 +8,19 @@ import java.util.UUID;
 
 import com.ziminpro.twitter.dtos.Constants;
 import com.ziminpro.twitter.dtos.Message;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 @Repository
 public class JdbcMessageRepository implements MessageRepository {
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
+
+    public JdbcMessageRepository(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     @Override
-    public Message getMessagebyId(UUID messageId) {
+    public Message getMessageById(UUID messageId) {
         List<Message> messages = jdbcTemplate.query(Constants.GET_MESSAGE_BY_ID,
                 (rs, rowNum) -> new Message(DaoHelper.bytesArrayToUuid(rs.getBytes("messages.id")),
                         DaoHelper.bytesArrayToUuid(rs.getBytes("messages.producer_id")),

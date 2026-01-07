@@ -1,0 +1,16 @@
+meta {
+  name: Unsubscribe from Producer
+  type: http
+  seq: 6
+}
+
+delete {
+  url: http://localhost:9001/subscriptions/producer/1cd89e11-602a-4186-afbf-e0149b59eb08
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -51,4 +51,6 @@ public class Constants {
                         + " WHERE `subscriber_id`=UUID_TO_BIN(?);";
         public static final String GET_SUBSCRIPTION = "SELECT * FROM " + TABLE_SUBSCRIPTIONS
                         + " WHERE subscriber_id=UUID_TO_BIN(?);";
+        public static final String DELETE_SINGLE_SUBSCRIPTION = "DELETE FROM " + TABLE_SUBSCRIPTIONS
+                + " WHERE `subscriber_id`=UUID_TO_BIN(?) AND `producer_id`=UUID_TO_BIN(?);";
 }

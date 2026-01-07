@@ -43,7 +43,7 @@ public class MessagesService {
 
     public Mono<Message> getMessageById(UUID messageId) {
         return Mono.fromCallable(() -> {
-            Message message = messageRepository.getMessagebyId(messageId);
+            Message message = messageRepository.getMessageById(messageId);
             if (message.getId() == null) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found");
             }
@@ -65,7 +65,7 @@ public class MessagesService {
             Collection<? extends GrantedAuthority> authorities
     ) {
         return Mono.fromRunnable(() -> {
-            Message message = messageRepository.getMessagebyId(messageId);
+            Message message = messageRepository.getMessageById(messageId);
             if (message.getId() == null) {
                 throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Message not found");
             }

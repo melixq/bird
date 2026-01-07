@@ -6,9 +6,9 @@ import java.util.UUID;
 import com.ziminpro.twitter.dtos.Message;
 
 public interface MessageRepository {
-    public Message getMessagebyId(UUID messageId);
-    public List<Message> getMessagesForProducerById(UUID producerId);
-    public List<Message> getMessagesForSubscriberById(UUID subscriberId);
-    public UUID createMessage(Message message);
-    public int deleteMessageById(UUID messageId);
+    Message getMessageById(UUID messageId);
+    List<Message> getMessagesForProducerById(UUID producerId);
+    List<Message> getMessagesForSubscriberById(UUID subscriberId);
+    UUID createMessage(Message message);
+    int deleteMessageById(UUID messageId);
 }

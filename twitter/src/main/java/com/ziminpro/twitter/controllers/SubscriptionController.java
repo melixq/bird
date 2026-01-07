@@ -1,5 +1,6 @@
 package com.ziminpro.twitter.controllers;
 
+import java.util.List;
 import java.util.UUID;
 
 import com.ziminpro.twitter.dtos.Subscription;
@@ -8,6 +9,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import reactor.core.publisher.Mono;
+
+// TODO:
+// - Correct Subs. Authorities and etc
+// - Fix unability to call UMS endpoints outside browser
+// - Update UI
+// - Store avatar url in JWT
+
 
 @RestController
 @RequestMapping("/subscriptions")
@@ -25,21 +33,38 @@ public class SubscriptionController {
     }
 
     @PostMapping
-    public Mono<Void> createSubscription(
-            @RequestBody Subscription subscription,
-            Authentication authentication) {
-
+    public Mono<Void> createSubscriptions(@RequestBody Subscription subscription, Authentication authentication) {
         UUID subscriberId = UUID.fromString(authentication.getPrincipal().toString());
-        subscription.setSubscriber(subscriberId);
+        return subscriptionsService.createSubscriptions(subscription, subscriberId, authentication.getAuthorities())
+                .then();
+    }
 
-        subscriptionsService.createSubscription(subscription);
-        return Mono.empty();
+    @PutMapping
+    public Mono<Void> updateSubscriptions(@RequestBody Subscription subscription, Authentication authentication) {
+        UUID subscriberId = UUID.fromString(authentication.getPrincipal().toString());
+        return subscriptionsService.updateSubscriptions(subscription, subscriberId, authentication.getAuthorities())
+                .then();
     }
 
     @DeleteMapping
-    public Mono<Void> deleteSubscription(Authentication authentication) {
+    public Mono<Void> deleteAllSubscriptions(Authentication authentication) {
         UUID subscriberId = UUID.fromString(authentication.getPrincipal().toString());
-        subscriptionsService.deleteSubscription(subscriberId);
-        return Mono.empty();
+        return subscriptionsService.deleteAllSubscriptions(subscriberId, authentication.getAuthorities());
+    }
+
+    @PostMapping("/producer/{producer-id}")
+    public Mono<Void> subscribeToProducer(@PathVariable("producer-id") UUID producerId, Authentication authentication) {
+        UUID subscriberId = UUID.fromString(authentication.getPrincipal().toString());
+        Subscription subscription = new Subscription();
+        subscription.setSubscriber(subscriberId);
+        subscription.setProducers(List.of(producerId));
+        return subscriptionsService.createSubscriptions(subscription, subscriberId, authentication.getAuthorities())
+                .then();
+    }
+
+    @DeleteMapping("/producer/{producer-id}")
+    public Mono<Void> unsubscribeFromProducer(@PathVariable("producer-id") UUID producerId, Authentication authentication) {
+        UUID subscriberId = UUID.fromString(authentication.getPrincipal().toString());
+        return subscriptionsService.deleteSingleSubscription(subscriberId, producerId, authentication.getAuthorities());
     }
 }
