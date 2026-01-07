@@ -2,11 +2,11 @@ package com.ziminpro.ums.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
-import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
@@ -18,9 +18,11 @@ import java.util.List;
 @EnableWebFluxSecurity
 public class SecurityConfig {
     private final OAuth2AuthenticationSuccessHandler successHandler;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
-    public SecurityConfig(OAuth2AuthenticationSuccessHandler successHandler) {
+    public SecurityConfig(OAuth2AuthenticationSuccessHandler successHandler, JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.successHandler = successHandler;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
     @Bean
@@ -35,11 +37,19 @@ public class SecurityConfig {
                                 "/auth/**",
                                 "/roles"
                         ).permitAll()
-                        .anyExchange().authenticated()
+                        .pathMatchers("/users/**").authenticated()
+                        .anyExchange().denyAll()
                 )
+                .addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .oauth2Login(oauth2 -> oauth2
                         .authenticationSuccessHandler(successHandler)
                 )
+                // Stop redirects for APIs
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint((exchange, ex1) -> {
+                            exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+                            return exchange.getResponse().setComplete();
+                        }))
                 .build();
     }
 
