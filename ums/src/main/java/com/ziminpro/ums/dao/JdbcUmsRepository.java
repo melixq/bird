@@ -111,6 +111,7 @@ public class JdbcUmsRepository implements UmsRepository {
                 user.setPassword(u.getPassword());
                 user.setGithubId(u.getGithubId());
                 user.setAvatarUrl(u.getAvatarUrl());
+                user.setTokenVersion(u.getTokenVersion());
                 user.setCreated(u.getCreated());
                 user.setLastSession(u.getLastSession());
             }
@@ -138,6 +139,7 @@ public class JdbcUmsRepository implements UmsRepository {
                 user.setPassword(u.getPassword());
                 user.setGithubId(u.getGithubId());
                 user.setAvatarUrl(u.getAvatarUrl());
+                user.setTokenVersion(u.getTokenVersion());
                 user.setCreated(u.getCreated());
                 user.setLastSession(u.getLastSession());
             }
@@ -165,6 +167,7 @@ public class JdbcUmsRepository implements UmsRepository {
                 user.setPassword(u.getPassword());
                 user.setGithubId(u.getGithubId());
                 user.setAvatarUrl(u.getAvatarUrl());
+                user.setTokenVersion(u.getTokenVersion());
                 user.setCreated(u.getCreated());
                 user.setLastSession(u.getLastSession());
             }
@@ -233,7 +236,7 @@ public class JdbcUmsRepository implements UmsRepository {
                         user.getGithubId(),
                         user.getAvatarUrl(),
                         timestamp,
-                        0
+                        user.getTokenVersion()
                 );
 
                 Roles subscriberRole = findRoleByName("SUBSCRIBER");
