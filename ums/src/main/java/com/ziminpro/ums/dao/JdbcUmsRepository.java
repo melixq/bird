@@ -33,6 +33,7 @@ public class JdbcUmsRepository implements UmsRepository {
         String password = rs.getString("users.password");
         String githubId = rs.getString("users.github_id");
         String avatarUrl = rs.getString("users.avatar_url");
+        Integer tokenVersion = rs.getInt("users.token_version");
         Integer created = rs.getInt("users.created");
 
         LastSession lastSession = null;
@@ -59,6 +60,7 @@ public class JdbcUmsRepository implements UmsRepository {
         user.setPassword(password);
         user.setGithubId(githubId);
         user.setAvatarUrl(avatarUrl);
+        user.setTokenVersion(tokenVersion);
         user.setCreated(created);
         user.setLastSession(lastSession);
 
