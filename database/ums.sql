@@ -58,8 +58,8 @@ CREATE TABLE `users_has_roles` (
   CONSTRAINT `fk_users_has_roles_users` FOREIGN KEY (`users_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-DROP TABLE IF EXISTS `sessions`;
-/*CREATE TABLE `sessions` (
+/*DROP TABLE IF EXISTS `sessions`;
+CREATE TABLE `sessions` (
     `id` binary(16) NOT NULL,
     `user_id` binary(16) NOT NULL,
     `access_token` varchar(512) NOT NULL,
@@ -96,12 +96,12 @@ INSERT INTO `roles` (`id`, `name`, `description`) VALUES
 (X'B479B3577E2547FA8DBABFDAEECC6C2C', 'SUBSCRIBER', 'Message content consumer'),
 (X'EB932DBB7005422FA6497190AF39E984', 'PRODUCER', 'Message content producer');
 
-INSERT INTO `users` (`id`, `name`, `email`, `password`, `created`, `last_visit_id`) VALUES
-(X'0DD03A597DBC4D0081073271B3345434', 'Angela Merkel', 'angela@merkel.de', 'password', '1504249224', X'8A0BE660EBC64C47AF813F7123977993'),
-(X'1CD89E11602A4186AFBFE0149B59EB08', 'Emmanuel Macron', 'emmanuel@macron.fr', 'password', '1504249224', X'BE76648F49F24FBE9BC434BD8C23C70E'),
-(X'6E27EA06A7164C89AF88813749A8BD48', 'Donald Trump', 'donalt@trump.us', 'password', '1604129987', X'BE76648F49F24FBE9BC434BD8C23C70E'),
-(X'70A64B5443C34C18BBEC64590FF7E0CC', 'Justing Trudeau', 'justin@trudeau.ca', 'password', '1504249224', X'3C37571B0F494FED875845BFAE428B29'),
-(X'ABB04B9F5D1040DD9076EB27CA76891A', 'Vladimir Putin', 'vladimir@putin.tu', 'password', '1504249224', X'7AC613D5538745E58C9F9F49A0F271E1');
+INSERT INTO `users` (`id`, `name`, `email`, `password`, `avatar_url`, `created`, `last_visit_id`) VALUES
+(X'0DD03A597DBC4D0081073271B3345434', 'Angela Merkel', 'angela@merkel.de', 'password', 'https://cdn.britannica.com/17/172817-050-B5A3AE9B/Angela-Merkel-2012.jpg', '1504249224', X'8A0BE660EBC64C47AF813F7123977993'),
+(X'1CD89E11602A4186AFBFE0149B59EB08', 'Emmanuel Macron', 'emmanuel@macron.fr', 'password', 'https://youth.europa.eu/sites/default/files/nnfe-people/1.-Macron.jpg' , '1504249224', X'BE76648F49F24FBE9BC434BD8C23C70E'),
+(X'6E27EA06A7164C89AF88813749A8BD48', 'Donald Trump', 'donalt@trump.us', 'password', 'https://static.toiimg.com/thumb/msid-78949145,width-400,resizemode-4/78949145.jpg' , '1604129987', X'BE76648F49F24FBE9BC434BD8C23C70E'),
+(X'70A64B5443C34C18BBEC64590FF7E0CC', 'Justing Trudeau', 'justin@trudeau.ca', 'password', 'https://lop.parl.ca/ParlInfoPic/17300/11644.jpg' ,'1504249224', X'3C37571B0F494FED875845BFAE428B29'),
+(X'ABB04B9F5D1040DD9076EB27CA76891A', 'Vladimir Putin', 'vladimir@putin.tu', 'password',  'https://cdn.britannica.com/65/194465-050-50F2A305/Vladimir-Putin-questions-news-conference-2016.jpg' ,'1504249224', X'7AC613D5538745E58C9F9F49A0F271E1');
 
 INSERT INTO `users_has_roles` (`users_id`, `roles_id`) VALUES
 (X'0DD03A597DBC4D0081073271B3345434', X'B479B3577E2547FA8DBABFDAEECC6C2C'),
