@@ -60,9 +60,8 @@ public class OAuth2AuthenticationSuccessHandler implements ServerAuthenticationS
                 // Redirect to frontend with tokens
                 String redirectUrl = UriComponentsBuilder
                         .fromUriString(frontendUrl + successRedirect)
-                        .queryParam("access_token", authResponse.getAccessToken())
-                        .queryParam("refresh_token", authResponse.getRefreshToken())
-                        .queryParam("expires_in", authResponse.getExpiresIn())
+                        .queryParam("accessToken", authResponse.getAccessToken())
+                        .queryParam("refreshToken", authResponse.getRefreshToken())
                         .build()
                         .toUriString();
 
