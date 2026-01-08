@@ -1,9 +1,4 @@
-## Local Twitter application
-This is a conceptual representation of the Twitter (X) application created for learning puproses for students in Algonquin College for course CST8277 "Enterprise Application Programming". The goal of this project is to demonstrate pros and cons of the microservice architecture in action and let student create the same application by themselves in 4 major steps:
-1. General design
-2. Data model
-3. Impelementation
-4. Securing applications
+## xTweet - Backend for UrFU "Bird" project
 
 ### Build & Run
 
@@ -16,7 +11,7 @@ To build the project, follow the steps below.
 2. Clone the repository from GitHub
     ```shell
     cd $HOME
-    git clone https://github.com/eugenezimin/bird.git
+    git clone https://github.com/melixq/bird.git
     ```
 2. Go into the folder
     ```shell
@@ -61,17 +56,6 @@ To build the project, follow the steps below.
 
 ### Verify How It Works
 As a result you should have 2 separate services running on your local machine using ports `9000` and `9001` accordingly. Import Postman collections from the `requests` folder into your Postman/Hopscotch/Insomnia client to check how it works.
-
-## Contributing 
-Contributions to this repository are welcome! If you would like to add a new code or improve an existing one, please follow these steps: 
-1. Fork the repository. 
-2. Create a new branch for your changes: `git checkout -b my-new-branch` 
-3. Add your article or make changes to an existing one. 
-4. Commit your changes: `git commit -m "Add new code"` 
-5. Push your changes to your forked repository: `git push origin my-new-branch` 
-6. Open a pull request in this repository, describing your changes. 
-
-Please ensure that your article is well-written, accurate, and includes relevant comments. 
 
 ## License 
 This repository is licensed under the [BSD 2-Clause License](LICENSE).
