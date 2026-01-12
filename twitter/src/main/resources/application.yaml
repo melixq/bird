@@ -11,7 +11,7 @@ spring:
     password: passw
 
 ums:
-  host: http://localhost
+  host: http://ums
   port: 9000
   paths:
     user: /users/user

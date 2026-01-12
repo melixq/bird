@@ -33,6 +33,6 @@ jwt:
   refresh-token-expiration: 604800000 # 7 Days
 
 frontend:
-  url: http://localhost:3000
-  success-redirect: /auth/success
-  failure-redirect: /auth/failure
+  url: ${FRONTEND_URL}
+  success-redirect: ${AUTH_SUCCESS_PATH}
+  failure-redirect: ${AUTH_FAIL_PATH}
