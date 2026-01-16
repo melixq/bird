@@ -1,0 +1,22 @@
+meta {
+  name: ValidateToken
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost:9000/auth/validate
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "token": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiI4MzQ2ODZhYi05MmVmLTQzZDEtODFjOC02Mzc5OWU2MzYyZmUiLCJqdGkiOiI4OGQ2NzA3Ny1mODNmLTQ3ZGMtODRhZi0wYzI2NDViMWVkYmYiLCJ0b2tlblZlcnNpb24iOjAsImVtYWlsIjoibWVsaXhxQGdpdGh1Yi5sb2NhbCIsIm5hbWUiOiJLdXpuZXRzb3YgTWF4aW0iLCJhdmF0YXJfdXJsIjoiaHR0cHM6Ly9hdmF0YXJzLmdpdGh1YnVzZXJjb250ZW50LmNvbS91LzYxNTE2NzkwP3Y9NCIsInJvbGVzIjpbIlNVQlNDUklCRVIiLCJQUk9EVUNFUiJdLCJ0eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzY4NTc0NDIzLCJleHAiOjE3Njg1NzUzMjN9.nzwN1U8r_z6tgDBipjJ6I3BjE-2XDpW9Kb9SfN-MDrznzgdGNInb_lZaPs8UIaAvdKuX5jV5OCZo_9u4nT-4aw"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

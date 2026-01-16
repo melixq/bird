@@ -1,0 +1,16 @@
+meta {
+  name: DeleteMessageById
+  type: http
+  seq: 5
+}
+
+delete {
+  url: http://localhost:9001/messages/3cae17d5-4588-4615-b6f9-aa260b82b98e
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

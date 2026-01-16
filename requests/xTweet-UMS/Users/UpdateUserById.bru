@@ -1,0 +1,23 @@
+meta {
+  name: UpdateUserById
+  type: http
+  seq: 3
+}
+
+put {
+  url: http://localhost:9000/users/216af575-691a-4212-a387-5ae935fea783
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "Maxim Kuznetsov",
+    "avatarUrl": "My New Avatar URL"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

@@ -1,0 +1,22 @@
+meta {
+  name: RefreshToken
+  type: http
+  seq: 2
+}
+
+post {
+  url: http://localhost:9000/auth/refresh
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "refreshToken": "eyJhbGciOiJIUzUxMiJ9.eyJzdWIiOiIyMTZhZjU3NS02OTFhLTQyMTItYTM4Ny01YWU5MzVmZWE3ODMiLCJ0eXBlIjoicmVmcmVzaCIsImp0aSI6IjlmMjE0YzAwLTE2MjMtNGJlZC1iOWY1LWFlOTgxOTYwOTQ4NyIsInRva2VuVmVyc2lvbiI6MCwiaWF0IjoxNzY4NTczMzg3LCJleHAiOjE3NjkxNzgxODd9.xTx3PAyxZboCxULMcI33M5VkUlulu6wxpM_7tvhg9Zw_m0nSeZkeWWGfYVCM31sFJ7S1J2-IcmQoZcEN6kO8Ag"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
