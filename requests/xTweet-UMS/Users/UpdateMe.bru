@@ -1,0 +1,23 @@
+meta {
+  name: UpdateMe
+  type: http
+  seq: 4
+}
+
+put {
+  url: http://localhost:9000/users/me
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "name": "My New Name",
+    "avatarUrl": "My New Avatar URL"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

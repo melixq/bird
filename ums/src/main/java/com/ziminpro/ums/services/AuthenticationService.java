@@ -134,6 +134,10 @@ public class AuthenticationService {
     }
 
     public JwtClaims validateToken(String token) {
+        boolean blacklisted = tokenBlacklistService.isTokenBlacklisted(token);
+        if (blacklisted) {
+            throw new RuntimeException("Token is blacklisted!");
+        }
         return jwtService.validateAndParseToken(token);
     }
 }

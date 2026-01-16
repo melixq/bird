@@ -1,0 +1,22 @@
+meta {
+  name: CreateMessage
+  type: http
+  seq: 4
+}
+
+post {
+  url: http://localhost:9001/messages
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "content": "My message's content!"
+  }
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

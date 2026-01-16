@@ -1,0 +1,16 @@
+meta {
+  name: GetMySubscriptions
+  type: http
+  seq: 1
+}
+
+get {
+  url: http://localhost:9001/subscriptions
+  body: none
+  auth: inherit
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
