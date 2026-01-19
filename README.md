@@ -11,7 +11,7 @@ To build the project, follow the steps below.
 2. Clone the repository from GitHub
     ```shell
     cd $HOME
-    git clone https://github.com/melixq/bird.git
+    git clone -b feat/github-oauth https://github.com/melixq/bird.git
     ```
 2. Go into the folder
     ```shell
@@ -55,7 +55,7 @@ To build the project, follow the steps below.
         ```
 
 ### Verify How It Works
-As a result you should have 2 separate services running on your local machine using ports `9000` and `9001` accordingly. Import Postman collections from the `requests` folder into your Postman/Hopscotch/Insomnia client to check how it works.
+As a result you should have 2 separate services running on your local machine using ports `9000` and `9001` accordingly. Import Bruno collections from the `requests` folder into your Bruno client to check how it works.
 
 ## License 
 This repository is licensed under the [BSD 2-Clause License](LICENSE).
